@@ -63,19 +63,19 @@ function PracticePanel({
   const [stage, setStage] = useState<PracticeStage>('info')
   const [transcript, setTranscript] = useState('')
   const [interimText, setInterimText] = useState('')
-  const [recording, setRecording] = useState(false)
   const [elapsed, setElapsed] = useState(0)
   const [feedback, setFeedback] = useState<GDFeedback | null>(null)
 
-  const recognitionRef = useRef<SpeechRecognition | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recognitionRef = useRef<any>(null)
   const timerRef       = useRef<ReturnType<typeof setInterval> | null>(null)
   const startTimeRef   = useRef<number>(0)
 
   // Check browser support
   const SpeechRecognitionAPI =
     typeof window !== 'undefined'
-      ? ((window as Window & { SpeechRecognition?: typeof SpeechRecognition; webkitSpeechRecognition?: typeof SpeechRecognition }).SpeechRecognition ||
-         (window as Window & { SpeechRecognition?: typeof SpeechRecognition; webkitSpeechRecognition?: typeof SpeechRecognition }).webkitSpeechRecognition)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ? ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition)
       : null
   const browserSupported = !!SpeechRecognitionAPI
 
@@ -96,25 +96,28 @@ function PracticePanel({
     recognition.interimResults = true
     recognition.lang = 'en-US'
 
-    recognition.onresult = (e: SpeechRecognitionEvent) => {
+    recognition.onresult = (e: Event) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const event = e as any
       let interim = ''
       let final = transcript
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const t = e.results[i]![0]!.transcript
-        if (e.results[i]!.isFinal) final += ' ' + t
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const t = event.results[i][0].transcript
+        if (event.results[i].isFinal) final += ' ' + t
         else interim = t
       }
       setTranscript(final.trim())
       setInterimText(interim)
     }
 
-    recognition.onerror = (e: SpeechRecognitionErrorEvent) => {
-      if (e.error !== 'no-speech') toast.error(`Mic error: ${e.error}`)
+    recognition.onerror = (e: Event) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const err = (e as any).error
+      if (err !== 'no-speech') toast.error(`Mic error: ${err}`)
     }
 
     recognition.start()
     recognitionRef.current = recognition
-    setRecording(true)
     setStage('recording')
     startTimeRef.current = Date.now()
 
@@ -126,7 +129,6 @@ function PracticePanel({
   function stopRecording() {
     recognitionRef.current?.stop()
     if (timerRef.current) clearInterval(timerRef.current)
-    setRecording(false)
     setInterimText('')
     setStage('review')
   }
@@ -137,8 +139,6 @@ function PracticePanel({
       if (timerRef.current) clearInterval(timerRef.current)
     }
   }, [])
-
-  const diffColor = topic.difficulty === 'easy' ? 'text-success' : topic.difficulty === 'hard' ? 'text-danger' : 'text-warning'
 
   return (
     <div className="fixed inset-0 z-50 flex">

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
@@ -44,8 +44,12 @@ export default function TeacherAssignmentsPage() {
       return res.data.data.items
     },
     enabled: !!user,
-    onSuccess: d => { if (!selectedCourse && d.length > 0) setSelectedCourse(d[0]._id) },
   })
+
+  // v5 compatible: auto-select first course when loaded
+  useEffect(() => {
+    if (courses && courses.length > 0 && !selectedCourse) setSelectedCourse(courses[0]._id)
+  }, [courses]) // eslint-disable-line
 
   const { data: assignments, isLoading: assignmentsLoading } = useQuery({
     queryKey: ['course-assignments', selectedCourse],

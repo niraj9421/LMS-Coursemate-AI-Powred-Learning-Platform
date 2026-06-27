@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
@@ -32,10 +32,12 @@ export default function TeacherAnalyticsPage() {
       return res.data.data.items
     },
     enabled: !!user,
-    onSuccess: (data) => {
-      if (!selectedCourse && data.length > 0) setSelectedCourse(data[0]._id)
-    },
   })
+
+  // v5 compatible: auto-select first course when loaded
+  useEffect(() => {
+    if (courses && courses.length > 0 && !selectedCourse) setSelectedCourse(courses[0]._id)
+  }, [courses]) // eslint-disable-line
 
   const { data: analytics, isLoading: analyticsLoading } = useQuery({
     queryKey: ['course-analytics', selectedCourse],

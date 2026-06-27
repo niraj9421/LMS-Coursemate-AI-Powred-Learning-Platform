@@ -5,7 +5,6 @@ import { useSocket } from '@/hooks/useSocket'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { Avatar } from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
 import { Icons } from '@/components/ui/Icons'
 
 interface ChatMsg {
@@ -49,7 +48,6 @@ export default function CommunityChatPage() {
   const [messages, setMessages]     = useState<ChatMsg[]>([])
   const [input, setInput]           = useState('')
   const [connected, setConnected]   = useState(false)
-  const [onlineCount, setOnlineCount] = useState(0)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef  = useRef<HTMLInputElement>(null)
   const prevRoom  = useRef<string>('')
