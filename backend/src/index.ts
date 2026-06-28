@@ -35,13 +35,18 @@ app.use(
         return callback(null, true);
       }
 
+      // Allow any Netlify subdomain (covers preview deploys like abc123--site.netlify.app)
+      if (origin && origin.endsWith('.netlify.app')) {
+        return callback(null, true);
+      }
+
       if (origin && env.ALLOWED_ORIGINS.includes(origin)) {
         return callback(null, true);
       }
 
       callback(new Error(`CORS: origin '${origin ?? 'unknown'}' is not allowed`));
     },
-    credentials: true,                  // allow cookies / Authorization header
+    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   }),
